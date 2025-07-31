@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Lucky Draw</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0fff0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px;
+    }
+
+    h1 {
+      color: #4CAF50;
+    }
+
+    input[type="text"] {
+      padding: 10px;
+      width: 250px;
+      margin-bottom: 20px;
+      font-size: 16px;
+      border: 2px solid #4CAF50;
+      border-radius: 5px;
+    }
+
+    .button-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 80px);
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    button.option {
+      padding: 15px;
+      font-size: 22px;
+      background-color: #90ee90;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    button.option:hover {
+      transform: scale(1.05);
+      background-color: #76d776;
+    }
+
+    button.option:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    .result {
+      font-size: 18px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Topic Selection Draw</h1>
+
+  <input type="text" id="username" placeholder="Enter your username and select an option" />
+
+  <div class="button-grid" id="buttonContainer"></div>
+
+  <div class="result" id="resultBox"></div>
+
+  <!-- Hidden form for Formspree submission -->
+  <form id="luckyForm" style="display:none;" method="POST" action="https://formspree.io/f/xwpqqakl">
+    <input type="hidden" name="username" id="formUsername" required>
+    <input type="hidden" name="selection" id="formSelection" required>
+  </form>
+
+  <script>
+    alert("Please only use the username given to you by admin")
+    const numbers = [1, 2, 3, 4, 1, 2, 3, 4];
+    let hiddenValues = [];
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function createButtons() {
+      const container = document.getElementById('buttonContainer');
+      container.innerHTML = '';
+      hiddenValues = shuffle([...numbers]);
+
+      hiddenValues.forEach((_, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'option';
+        btn.textContent = '?';
+        btn.dataset.index = index;
+        btn.onclick = () => handleSelection(index, btn);
+        container.appendChild(btn);
+      });
+    }
+
+    function handleSelection(index, button) {
+      const username = document.getElementById('username').value.trim();
+      if (!username) {
+        alert('Please enter a username first!');
+        return;
+      }
+
+      const value = hiddenValues[index];
+      button.textContent = value;
+
+      // Disable all buttons
+      document.querySelectorAll('.option').forEach(btn => btn.disabled = true);
+
+      // Show result
+      document.getElementById('resultBox').textContent = `${username} selected number: ${value}`;
+
+      // Submit to Formspree
+      document.getElementById('formUsername').value = username;
+      document.getElementById('formSelection').value = value;
+      document.getElementById('luckyForm').submit();
+    }
+
+    window.onload = createButtons;
+  </script>
+
+</body>
+</html>
